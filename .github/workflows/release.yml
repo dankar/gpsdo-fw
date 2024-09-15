@@ -1,0 +1,36 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  gh_tagged_release:
+    name: "Release"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        type: [Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: arm-none-eabi-gcc
+      uses: ryanwinter/arm-none-eabi-gcc@master
+      with:
+        release: '10-2021.10'
+
+    - name: Build binary
+      run: |
+        cmake -Bbuild -DCMAKE_BUILD_TYPE="${{ matrix.type }}"
+        cmake --build build
+    
+    - name: "Create release"
+      uses: actions/upload-artifact@v3
+      with:
+        name: release
+        path: build/gpsdo.elf

@@ -1,0 +1,30 @@
+name: CMake
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        type: [Debug, Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: arm-none-eabi-gcc
+      uses: ryanwinter/arm-none-eabi-gcc@master
+      with:
+        release: '10-2021.10'
+
+    - name: Build binary
+      run: |
+        cmake -Bbuild -DCMAKE_BUILD_TYPE="${{ matrix.type }}"
+        cmake --build build

@@ -38,7 +38,7 @@ void warmup()
 
 void gpsdo(void)
 {
-    TIM1->CCR2 = 25500;
+    TIM1->CCR2 = 38458;
 
     LCD_Init();
 
@@ -47,14 +47,11 @@ void gpsdo(void)
     LCD_Clear();
 
     circbuf_init(&circular_buffer);
+    HAL_Delay(100);
     frequency_start();
 
     HAL_TIM_Base_Start(&htim3);
     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
-
-    // Let the PWM/VCO stabilize. No clue how long it actually takes,
-    // but a delay here seems to help. 2000ms is probably not needed.
-    HAL_Delay(2000);
 
     char screen_buffer[9];
 
@@ -62,6 +59,7 @@ void gpsdo(void)
     // uint16_t prev_encoder = 0;
 
     uint32_t last_print = 0;
+    uint32_t seconds_passed = 0;
 
     while (1) {
         // Select view based on rotary encoder value
@@ -77,6 +75,11 @@ void gpsdo(void)
         uint32_t now = HAL_GetTick();
 
         if (now - last_print > 1000) {
+            if(seconds_passed == 3)
+            {
+                // Start adjusting the VCO after some time
+                frequency_allow_adjustment(true);
+            }
             last_print = now;
             
             while(printing == 1);
@@ -104,6 +107,8 @@ void gpsdo(void)
                 LCD_Puts(0, 1, screen_buffer);
             }
             printing = 0;
+            
+            seconds_passed++;
         }
     }
 }
