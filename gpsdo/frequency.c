@@ -15,6 +15,10 @@ volatile uint8_t    first            = 1;
 volatile uint32_t   last_pps         = 0;
 volatile uint32_t   num_samples      = 0;
 volatile circbuf_t  circular_buffer;
+
+// Quick hack to stop the interrupt from printing at the same time as the main loop.
+// This should probably be done with atomic operations, or instead use signalling from the
+// interrupt and let the main loop print the PPS indicator.
 extern volatile int printing;
 
 // Quick and dirty circular buffer
