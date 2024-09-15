@@ -51,6 +51,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     LCD/LCD.c
     gpsdo/main.c
     gpsdo/frequency.c
+    gpsdo/gps.c
 )
 
 # Add include paths
