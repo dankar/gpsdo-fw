@@ -29,6 +29,8 @@ Bottom line is the current UTC time from GPS module.
 
 Rotating the encoder one step will switch to showing the full PPB error (times 100 for reasons) and the current PWM output.
 
+The firmware uses an LCD library from https://www.github.com/NimaLTD and I would have loved to just use it as a submodule, but I have to edit it slightly.
+
 ### USB
 
 It would be nice to have NMEA output over USB, and the Blue Pill dev board in the GPSDO does have a USB connector. It's however difficult to use since it requires a PLLCLK of 48MHz. But since we use 10MHz as input instead of 8MHz this can't be achieved. It should be possible to run the LSI to the PLL and then run the USB off of that. Then run the HSE directly to the peripherals. But then the timers would be running at 10MHz and I don't know how that would affect the rest of it.
