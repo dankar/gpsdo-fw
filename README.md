@@ -6,11 +6,11 @@ I took apart the GPSDO and checked the connections, and then wrote my own firmwa
 
 * The OCXO is connected to the OSC_IN on the Blue Pill board. Funnily enough the original 8MHz xtal is still there, but I suppose the OCXO overrides it.
 * The PPS is connected to the CH1 input on TIM1.
-* The VCO is controlled via PWM from TIM2.
+* The VCO is controlled via PWM from CH2 of TIM1.
 
 What I ended up doing in my firmware is to PLL the clock up to 70MHz. I don't think this should hurt anything(?) and even if it's just PLL'd, it should give us some more resolution in the measurements, maybe? Then TIM1 is setup to count the internal 70MHz clock, and it is gated by the PPS pulse from the GPS module. This means that it continually counts how many cycles on the clock passes between each PPS pulse. This is then used to adjust the VCO.
 
-The VCO is simply adjusted by the error detected between two pulses. If 70000001 clocks are counted, the VCO voltage will drop a bit and so on. This is really simple, but due to the small adjustments, it will average out over time and we sort of get "super sampling".
+The VCO is simply adjusted by the error detected between two pulses. If 70000001 clocks are counted, the VCO voltage will drop a bit and so on. This is really simple, but due to the small adjustments, it will average out over time and it should work out since the counter is always running. If we are running at 70 000 000.01 we will get one more clock every 100 seconds, which will then cause a small adjustment (smallest adjustment possible).
 
 It's fairly slow to reach a steady state, and it can probably easily be sped up. I don't know if my logic is sound, so it might be tuning the OCXO to 9.999998MHz instead of 10MHz.
 
