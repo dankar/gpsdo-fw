@@ -52,12 +52,14 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     gpsdo/main.c
     gpsdo/frequency.c
     gpsdo/gps.c
+    eeprom/ee.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     LCD/
+    eeprom/
 )
 
 # Add project symbols (macros)

@@ -12,6 +12,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ee.h"
+
+typedef struct
+{
+    uint16_t pwm;
+
+} ee_storage_t;
+
+ee_storage_t ee_storage;
 
 volatile int printing = 0;
 
@@ -38,12 +47,15 @@ void warmup()
 
 void gpsdo(void)
 {
-    // TODO: This value should be saved and reloaded on start
-    TIM1->CCR2 = 38286;
+
+    EE_Init(&ee_storage, sizeof(ee_storage_t));
+    EE_Read();
+    TIM1->CCR2 = ee_storage.pwm;
 
     LCD_Init();
 
     //warmup();
+
 
     LCD_Clear();
 
@@ -60,6 +72,7 @@ void gpsdo(void)
     // uint16_t prev_encoder = 0;
 
     uint32_t last_print = 0;
+    uint32_t last_save = 0;
 
     while (1) {
         // Select view based on rotary encoder value
@@ -73,6 +86,15 @@ void gpsdo(void)
         gps_read();
 
         uint32_t now = HAL_GetTick();
+
+        if(now - last_save > 30000)
+        {
+            if(ee_storage.pwm != TIM1->CCR2)
+            {
+                ee_storage.pwm = TIM1->CCR2;
+                EE_Write();
+            }
+        }
 
         if (now - last_print > 1000) {
             if(now >= 3000)
