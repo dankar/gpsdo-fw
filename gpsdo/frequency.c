@@ -61,8 +61,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
 
         capture = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
-        if(allow_adjustment)
-        {
+        if (allow_adjustment) {
             // Ignore first capture and do a sanity check on elapsed time since previous PPS
             if (!first && current_tick - last_pps < 1300) {
                 frequency = capture - previous_capture + (TIM1->ARR + 1) * timer_overflows;
@@ -75,17 +74,11 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
                     // This is all just guesses and should be investigated more fully.
                     int32_t adjustment = 0;
 
-                    if(abs(current_error) > 10)
-                    {
+                    if (abs(current_error) > 10) {
                         adjustment = abs(current_error) * current_error * 2;
-                    }
-                    else
-                        if(abs(current_error) > 2)
-                    {
+                    } else if (abs(current_error) > 2) {
                         adjustment = abs(current_error) * current_error;
-                    }
-                    else
-                    {
+                    } else {
                         adjustment = current_error / 2;
                     }
 
@@ -135,12 +128,9 @@ int32_t frequency_get_error()
     } else {
         int32_t error = frequency - HAL_RCC_GetHCLKFreq();
         // Filter out obvious glitches, the OCXO should never be this far from the target frequency
-        if(error > 2000 || error < -2000)
-        {
+        if (error > 2000 || error < -2000) {
             return 0;
-        }
-        else
-        {
+        } else {
             return error;
         }
     }

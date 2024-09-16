@@ -29,7 +29,7 @@ Top left corner contains an indicator for PPS pulses. Next to that is the curren
 
 Bottom line is the current UTC time from GPS module.
 
-Rotating the encoder one step will switch to showing the full PPB error (times 100 for reasons) and the current PWM output.
+Rotating the encoder one step will switch to showing the full PPB error and the current PWM output.
 
 The firmware uses an LCD library from https://www.github.com/NimaLTD and I would have loved to just use it as a submodule, but I have to edit it slightly.
 

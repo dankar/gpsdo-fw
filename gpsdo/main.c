@@ -39,7 +39,7 @@ void warmup()
 void gpsdo(void)
 {
     // TODO: This value should be saved and reloaded on start
-    TIM1->CCR2 = 38450;
+    TIM1->CCR2 = 38286;
 
     LCD_Init();
 
@@ -60,11 +60,10 @@ void gpsdo(void)
     // uint16_t prev_encoder = 0;
 
     uint32_t last_print = 0;
-    uint32_t seconds_passed = 0;
 
     while (1) {
         // Select view based on rotary encoder value
-        uint16_t new_view = TIM3->CCR1 / 2 % 2;
+        uint16_t new_view = TIM3->CCR1 / 2 % 4;
         if(new_view != view)
         {
             view = new_view;
@@ -76,7 +75,7 @@ void gpsdo(void)
         uint32_t now = HAL_GetTick();
 
         if (now - last_print > 1000) {
-            if(seconds_passed == 3)
+            if(now >= 3000)
             {
                 // Start adjusting the VCO after some time
                 frequency_allow_adjustment(true);
@@ -85,32 +84,50 @@ void gpsdo(void)
             
             while(printing == 1);
             printing = 1;
-            
-            if (view == 0) {
-                char     ppb_string[5];
-                uint32_t ppb = abs(frequency_get_ppb());
 
+            char     ppb_string[5];
+            int32_t ppb;
+
+            switch(view)
+            {
+            case 0:
+                // Main screen with satellites, ppb and UTC time
+                ppb = abs(frequency_get_ppb());
+                
                 if (ppb > 999) {
                     strcpy(ppb_string, ">=10");
                 } else {
                     sprintf(ppb_string, "%ld.%02ld", ppb / 100, ppb % 100);
                 }
-
+                
                 sprintf(screen_buffer, "%02d %s", num_sats, ppb_string);
                 LCD_Puts(1, 0, screen_buffer);
                 LCD_Puts(0, 1, gps_time);
-            } else {
-                int32_t ppb = frequency_get_ppb();
-                LCD_Puts(1, 0, "       ");
+                break;
+            case 1:
+                // Screen with ppb
+                ppb = frequency_get_ppb();
+                LCD_Puts(1, 0, "PPB    ");
                 LCD_Puts(0, 1, "        ");
                 sprintf(screen_buffer, "%ld.%02ld", ppb/100, abs(ppb)%100);
-                LCD_Puts(1, 0, screen_buffer);
-                sprintf(screen_buffer, "PWM%ld", TIM1->CCR2);
                 LCD_Puts(0, 1, screen_buffer);
+                break;
+            case 2:
+                // Screen with current PPM
+                LCD_Puts(1, 0, "PWM    ");
+                LCD_Puts(0, 1, "        ");
+                sprintf(screen_buffer, "%ld", TIM1->CCR2);
+                LCD_Puts(0, 1, screen_buffer);
+                break;
+            case 3:
+                LCD_Puts(1, 0, "UPTIME ");
+                LCD_Puts(0, 1, "        ");
+                sprintf(screen_buffer, "%ld", HAL_GetTick()/1000);
+                LCD_Puts(0, 1, screen_buffer);
+                break;
             }
-            printing = 0;
             
-            seconds_passed++;
+            printing = 0;
         }
     }
 }
