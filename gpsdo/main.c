@@ -100,9 +100,10 @@ void gpsdo(void)
                 LCD_Puts(1, 0, screen_buffer);
                 LCD_Puts(0, 1, gps_time);
             } else {
+                int32_t ppb = frequency_get_ppb();
                 LCD_Puts(1, 0, "       ");
                 LCD_Puts(0, 1, "        ");
-                sprintf(screen_buffer, "%ld", frequency_get_ppb());
+                sprintf(screen_buffer, "%ld.%02ld", ppb/100, abs(ppb)%100);
                 LCD_Puts(1, 0, screen_buffer);
                 sprintf(screen_buffer, "PWM%ld", TIM1->CCR2);
                 LCD_Puts(0, 1, screen_buffer);

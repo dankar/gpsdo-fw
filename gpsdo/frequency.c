@@ -70,10 +70,24 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
                 int32_t current_error = frequency_get_error();
 
                 if (current_error != 0) {
-                    // Use error^2 to adjust PWM for larger errors, but preserve sign.
+                    // Use error^3 to adjust PWM for larger errors, but preserve sign.
                     // Make even smaller adjustments close to 0.
                     // This is all just guesses and should be investigated more fully.
-                    int32_t adjustment = current_error > 3 ? abs(current_error) * current_error : current_error / 2;
+                    int32_t adjustment = 0;
+
+                    if(abs(current_error) > 10)
+                    {
+                        adjustment = abs(current_error) * current_error * 2;
+                    }
+                    else
+                        if(abs(current_error) > 2)
+                    {
+                        adjustment = abs(current_error) * current_error;
+                    }
+                    else
+                    {
+                        adjustment = current_error / 2;
+                    }
 
                     // Apply it
                     TIM1->CCR2 -= adjustment;
@@ -95,7 +109,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
             if (pps_indicator) {
                 LCD_Puts(0, 0, "*");
             } else {
-                LCD_Puts(0, 0, "-");
+                LCD_Puts(0, 0, "|");
             }
             pps_indicator = !pps_indicator;
             printing      = 0;
