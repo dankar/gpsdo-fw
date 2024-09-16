@@ -50,6 +50,10 @@ void gpsdo(void)
 
     EE_Init(&ee_storage, sizeof(ee_storage_t));
     EE_Read();
+    if(ee_storage.pwm == 0xffff)
+    {
+        ee_storage.pwm = 38000;
+    }
     TIM1->CCR2 = ee_storage.pwm;
 
     LCD_Init();
