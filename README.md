@@ -20,8 +20,10 @@ The displayed PPB error is a long running average. It counts the number of clock
 
 Example of display:
 
-"*10 1.12"
-"18:27:55"
+```
+*10 1.12
+18:27:55
+```
 
 Top left corner contains an indicator for PPS pulses. Next to that is the current number of satellites *used* by the GPS module. To the right of that is the current measured PPB error.
 
@@ -33,4 +35,4 @@ The firmware uses an LCD library from https://www.github.com/NimaLTD and I would
 
 ### USB
 
-It would be nice to have NMEA output over USB, and the Blue Pill dev board in the GPSDO does have a USB connector. It's however difficult to use since it requires a PLLCLK of 48MHz. But since we use 10MHz as input instead of 8MHz this can't be achieved. It should be possible to run the LSI to the PLL and then run the USB off of that. Then run the HSE directly to the peripherals. But then the timers would be running at 10MHz and I don't know how that would affect the rest of it.
+It would be nice to have NMEA output over USB, and the Blue Pill dev board in the GPSDO does have a USB connector. It's however difficult to use since it requires a PLLCLK of 48MHz. But since we use 10MHz as input instead of 8MHz this can't be achieved. It should be possible to run the HSI to the PLL and then run the USB off of that. Then run the HSE directly to the peripherals. But then the timers would be running at 10MHz and I don't know how that would affect the rest of it.
