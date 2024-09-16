@@ -141,5 +141,5 @@ int32_t frequency_get_ppb()
     // Get ratio of cumulative error / expected number of cycles. Multiply by 1e9 for PPB and by
     // 100 to get additional digits without using floats.
     // This will be a running average over 128 seconds of the error in PPB*100
-    return (int64_t)circbuf_sum(&circular_buffer) * 1000000000 * 100 / ((int64_t)HAL_RCC_GetHCLKFreq() * CIRCULAR_BUFFER_LEN);
+    return (int64_t)circbuf_sum(&circular_buffer) * 1000000000 * 100 / ((int64_t)HAL_RCC_GetHCLKFreq() * num_samples);
 }

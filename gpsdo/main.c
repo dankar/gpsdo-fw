@@ -38,11 +38,12 @@ void warmup()
 
 void gpsdo(void)
 {
-    TIM1->CCR2 = 38458;
+    // TODO: This value should be saved and reloaded on start
+    TIM1->CCR2 = 25320;
 
     LCD_Init();
 
-    //    warmup();
+    //warmup();
 
     LCD_Clear();
 
