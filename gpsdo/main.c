@@ -58,8 +58,7 @@ void gpsdo(void)
 
     LCD_Init();
 
-    //warmup();
-
+    warmup();
 
     LCD_Clear();
 
