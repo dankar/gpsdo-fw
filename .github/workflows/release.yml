@@ -28,9 +28,13 @@ jobs:
       run: |
         cmake -Bbuild -DCMAKE_BUILD_TYPE="${{ matrix.type }}"
         cmake --build build
+        arm-none-eabi-objcopy -O binary build/gpsdo.elf build/gpsdo.bin
     
-    - name: "Create release"
-      uses: actions/upload-artifact@v3
+    - name: Create release
+      uses: "marvinpinto/action-automatic-releases@latest"
       with:
-        name: release
-        path: build/gpsdo.elf
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          build/gpsdo.elf
+          build/gpsdo.bin
