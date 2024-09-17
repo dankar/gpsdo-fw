@@ -54,7 +54,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
                     } else if (abs(current_error) > 2) {
                         adjustment = abs(current_error) * current_error;
                     } else {
-                        adjustment = current_error / 2;
+                        adjustment = current_error;
                     }
 
                     // Apply it
