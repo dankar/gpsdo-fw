@@ -9,17 +9,7 @@
 #include <string.h>
 #include "int.h"
 
-
-
-
-
-
-
-
 volatile circbuf_t circular_buffer;
-
-
-
 
 // Quick hack to stop the interrupt from printing at the same time as the main loop.
 // This should probably be done with atomic operations, or instead use signalling from the
@@ -47,10 +37,6 @@ int32_t circbuf_sum(volatile circbuf_t* circbuf)
     }
     return sum;
 }
-
-
-
-
 
 void frequency_start()
 {
