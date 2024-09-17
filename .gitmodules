@@ -1,0 +1,3 @@
+[submodule "eeprom"]
+	path = eeprom
+	url = https://github.com/nimaltd/ee
