@@ -1,6 +1,7 @@
 #include "frequency.h"
 #include "LCD.h"
 #include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_gpio.h"
 #include "stm32f1xx_hal_rcc.h"
 #include "tim.h"
 #include <stdbool.h>
@@ -20,7 +21,7 @@ volatile bool      allow_adjustment = false;
 // Quick hack to stop the interrupt from printing at the same time as the main loop.
 // This should probably be done with atomic operations, or instead use signalling from the
 // interrupt and let the main loop print the PPS indicator.
-extern volatile int printing;
+extern volatile int menu_printing;
 
 // Quick and dirty circular buffer
 void circbuf_init(volatile circbuf_t* circbuf)
@@ -97,15 +98,15 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
             first            = 0;
         }
 
-        if (!printing) {
-            printing = 1;
+        if (!menu_printing) {
+            menu_printing = 1;
             if (pps_indicator) {
                 LCD_Puts(0, 0, "*");
             } else {
                 LCD_Puts(0, 0, "|");
             }
             pps_indicator = !pps_indicator;
-            printing      = 0;
+            menu_printing      = 0;
         }
     }
 }

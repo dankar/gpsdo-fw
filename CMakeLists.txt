@@ -52,6 +52,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     gpsdo/main.c
     gpsdo/frequency.c
     gpsdo/gps.c
+    gpsdo/menu.c
+    gpsdo/eeprom.c
     eeprom/ee.c
 )
 

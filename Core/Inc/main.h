@@ -59,6 +59,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define ROTARY_PRESS_Pin GPIO_PIN_5
 #define ROTARY_PRESS_GPIO_Port GPIOA
+#define ROTARY_PRESS_EXTI_IRQn EXTI9_5_IRQn
 #define ROTARY_A_Pin GPIO_PIN_6
 #define ROTARY_A_GPIO_Port GPIOA
 #define ROTARY_B_Pin GPIO_PIN_7
