@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+extern volatile int menu_printing;
+
 bool rotary_get_click();
 void menu_run();
 

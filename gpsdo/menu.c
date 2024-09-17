@@ -9,6 +9,7 @@
 #include "eeprom.h"
 #include "gps.h"
 #include "stm32f1xx_hal_gpio.h"
+#include "int.h"
 
 /// All times in ms
 #define DEBOUNCE_TIME        100
@@ -55,9 +56,54 @@ static bool        cal_save_screen     = false;
 
 static void menu_force_redraw() { last_screen_refresh = 0; }
 
+static void menu_draw()
+{
+    char    screen_buffer[9];
+    char    ppb_string[5];
+    int32_t ppb;
+
+    switch (current_menu_screen) {
+    default:
+    case SCREEN_MAIN:
+        // Main screen with satellites, ppb and UTC time
+        ppb = abs(frequency_get_ppb());
+
+        if (ppb > 999) {
+            strcpy(ppb_string, ">=10");
+        } else {
+            sprintf(ppb_string, "%ld.%02ld", ppb / 100, ppb % 100);
+        }
+
+        sprintf(screen_buffer, "%02d %s", num_sats, ppb_string);
+        LCD_Puts(1, 0, screen_buffer);
+        LCD_Puts(0, 1, gps_time);
+        break;
+    case SCREEN_PPB:
+        // Screen with ppb
+        ppb = frequency_get_ppb();
+        LCD_Puts(1, 0, "PPB    ");
+        LCD_Puts(0, 1, "        ");
+        sprintf(screen_buffer, "%ld.%02ld", ppb / 100, abs(ppb) % 100);
+        LCD_Puts(0, 1, screen_buffer);
+        break;
+    case SCREEN_PWM:
+        // Screen with current PPM
+        LCD_Puts(1, 0, "PWM    ");
+        LCD_Puts(0, 1, "        ");
+        sprintf(screen_buffer, "%ld", TIM1->CCR2);
+        LCD_Puts(0, 1, screen_buffer);
+        break;
+    case SCREEN_UPTIME:
+        LCD_Puts(1, 0, "UPTIME ");
+        LCD_Puts(0, 1, "        ");
+        sprintf(screen_buffer, "%ld", device_uptime);
+        LCD_Puts(0, 1, screen_buffer);
+        break;
+    }
+}
+
 void menu_run()
 {
-    char screen_buffer[9];
 
     // Select view based on rotary encoder value
     menu_screen new_view = TIM3->CCR1 / 2 % SCREEN_MAX;
@@ -99,55 +145,11 @@ void menu_run()
             ;
         menu_printing = 1;
 
-        if(cal_save_screen)
-        {
+        if (cal_save_screen) {
             LCD_Puts(0, 0, " PRESS ");
             LCD_Puts(0, 1, "TO SAVE");
-        }
-        else
-        {
-
-            char    ppb_string[5];
-            int32_t ppb;
-            
-            switch (current_menu_screen) {
-            default:
-            case SCREEN_MAIN:
-                // Main screen with satellites, ppb and UTC time
-                ppb = abs(frequency_get_ppb());
-                
-                if (ppb > 999) {
-                    strcpy(ppb_string, ">=10");
-                } else {
-                    sprintf(ppb_string, "%ld.%02ld", ppb / 100, ppb % 100);
-                }
-                
-                sprintf(screen_buffer, "%02d %s", num_sats, ppb_string);
-                LCD_Puts(1, 0, screen_buffer);
-                LCD_Puts(0, 1, gps_time);
-                break;
-            case SCREEN_PPB:
-                // Screen with ppb
-                ppb = frequency_get_ppb();
-                LCD_Puts(1, 0, "PPB    ");
-                LCD_Puts(0, 1, "        ");
-                sprintf(screen_buffer, "%ld.%02ld", ppb / 100, abs(ppb) % 100);
-                LCD_Puts(0, 1, screen_buffer);
-                break;
-            case SCREEN_PWM:
-                // Screen with current PPM
-                LCD_Puts(1, 0, "PWM    ");
-                LCD_Puts(0, 1, "        ");
-                sprintf(screen_buffer, "%ld", TIM1->CCR2);
-                LCD_Puts(0, 1, screen_buffer);
-                break;
-            case SCREEN_UPTIME:
-                LCD_Puts(1, 0, "UPTIME ");
-                LCD_Puts(0, 1, "        ");
-                sprintf(screen_buffer, "%ld", HAL_GetTick() / 1000);
-                LCD_Puts(0, 1, screen_buffer);
-                break;
-            }
+        } else {
+            menu_draw();
         }
 
         menu_printing = 0;

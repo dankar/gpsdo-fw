@@ -34,7 +34,8 @@ void warmup()
 
 void gpsdo(void)
 {
-
+    HAL_TIM_Base_Start_IT(&htim2);
+    
     EE_Init(&ee_storage, sizeof(ee_storage_t));
     EE_Read();
     if(ee_storage.pwm == 0xffff)
@@ -55,10 +56,6 @@ void gpsdo(void)
 
     HAL_TIM_Base_Start(&htim3);
     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
-
-    
-
-    
 
     while (1) {
         gps_read();

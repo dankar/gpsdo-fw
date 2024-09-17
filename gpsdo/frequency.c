@@ -7,16 +7,19 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include "int.h"
 
-volatile uint32_t  timer_overflows  = 0;
-volatile uint32_t  capture          = 0;
-volatile uint32_t  previous_capture = 0;
-volatile uint32_t  frequency        = 0;
-volatile uint8_t   first            = 1;
-volatile uint32_t  last_pps         = 0;
-volatile uint32_t  num_samples      = 0;
+
+
+
+
+
+
+
 volatile circbuf_t circular_buffer;
-volatile bool      allow_adjustment = false;
+
+
+
 
 // Quick hack to stop the interrupt from printing at the same time as the main loop.
 // This should probably be done with atomic operations, or instead use signalling from the
@@ -45,71 +48,9 @@ int32_t circbuf_sum(volatile circbuf_t* circbuf)
     return sum;
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
-{
-    if (htim == &htim1) {
-        timer_overflows++;
-    }
-}
 
-// This gets run each time PPS goes high
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
-{
-    static bool pps_indicator = false;
 
-    uint32_t current_tick = HAL_GetTick();
-    if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
 
-        capture = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-
-        if (allow_adjustment) {
-            // Ignore first capture and do a sanity check on elapsed time since previous PPS
-            if (!first && current_tick - last_pps < 1300) {
-                frequency = capture - previous_capture + (TIM1->ARR + 1) * timer_overflows;
-
-                int32_t current_error = frequency_get_error();
-
-                if (current_error != 0) {
-                    // Use error^3 to adjust PWM for larger errors, but preserve sign.
-                    // Make even smaller adjustments close to 0.
-                    // This is all just guesses and should be investigated more fully.
-                    int32_t adjustment = 0;
-
-                    if (abs(current_error) > 10) {
-                        adjustment = abs(current_error) * current_error * 2;
-                    } else if (abs(current_error) > 2) {
-                        adjustment = abs(current_error) * current_error;
-                    } else {
-                        adjustment = current_error / 2;
-                    }
-
-                    // Apply it
-                    TIM1->CCR2 -= adjustment;
-                }
-
-                circbuf_add(&circular_buffer, frequency_get_error());
-                if (num_samples < CIRCULAR_BUFFER_LEN)
-                    num_samples++;
-            }
-
-            previous_capture = capture;
-            timer_overflows  = 0;
-            last_pps         = current_tick;
-            first            = 0;
-        }
-
-        if (!menu_printing) {
-            menu_printing = 1;
-            if (pps_indicator) {
-                LCD_Puts(0, 0, "*");
-            } else {
-                LCD_Puts(0, 0, "|");
-            }
-            pps_indicator = !pps_indicator;
-            menu_printing      = 0;
-        }
-    }
-}
 
 void frequency_start()
 {
