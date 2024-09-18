@@ -16,7 +16,7 @@ volatile uint32_t device_uptime    = 0;
 volatile uint8_t  first            = 1;
 volatile uint32_t last_pps         = 0;
 
-const char spinner[]   = "|/-\\";
+const char spinner[]   = "|/-\1";
 uint8_t    pps_spinner = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)

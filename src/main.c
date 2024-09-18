@@ -32,6 +32,17 @@ void warmup()
     }
 }
 
+uint8_t lcd_backslash[8] = {
+	0b00000,
+	0b10000,
+	0b01000,
+	0b00100,
+	0b00010,
+	0b00001,
+	0b00000,
+	0b00000
+};
+
 void gpsdo(void)
 {
     HAL_TIM_Base_Start_IT(&htim2);
@@ -45,6 +56,8 @@ void gpsdo(void)
     TIM1->CCR2 = ee_storage.pwm;
 
     LCD_Init();
+
+    LCD_CreateChar(1, lcd_backslash);
 
     warmup();
 
