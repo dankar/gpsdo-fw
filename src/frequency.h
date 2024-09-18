@@ -14,7 +14,6 @@ typedef struct circbuf_t {
 
 extern volatile circbuf_t circular_buffer;
 
-void    circbuf_init(volatile circbuf_t* circbuf);
 void    circbuf_add(volatile circbuf_t* circbuf, int32_t val);
 int32_t circbuf_sum(volatile circbuf_t* circbuf);
 

@@ -63,7 +63,6 @@ void gpsdo(void)
 
     LCD_Clear();
 
-    circbuf_init(&circular_buffer);
     HAL_Delay(100);
     frequency_start();
 

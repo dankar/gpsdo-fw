@@ -64,6 +64,8 @@ bool fifo_read(volatile fifo_buffer_t *fifo, uint8_t *c)
     }
     *c = fifo->buffer[fifo->read];
     fifo->read = next;
+
+    return true;
 }
 
 volatile uint8_t it_buf;

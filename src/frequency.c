@@ -9,7 +9,7 @@
 #include <string.h>
 #include "int.h"
 
-volatile circbuf_t circular_buffer;
+volatile circbuf_t circular_buffer = {0};
 
 // Quick hack to stop the interrupt from printing at the same time as the main loop.
 // This should probably be done with atomic operations, or instead use signalling from the
@@ -17,12 +17,6 @@ volatile circbuf_t circular_buffer;
 extern volatile int menu_printing;
 
 // Quick and dirty circular buffer
-void circbuf_init(volatile circbuf_t* circbuf)
-{
-    circbuf->write = 0;
-    memset((void*)circbuf->buf, 0, CIRCULAR_BUFFER_LEN * sizeof(int32_t));
-}
-
 void circbuf_add(volatile circbuf_t* circbuf, int32_t val)
 {
     circbuf->buf[circbuf->write] = val;
