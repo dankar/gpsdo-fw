@@ -58,7 +58,7 @@ static void menu_force_redraw() { last_screen_refresh = 0; }
 
 static void menu_draw()
 {
-    char    screen_buffer[9];
+    char    screen_buffer[13];
     char    ppb_string[5];
     int32_t ppb;
 
@@ -83,7 +83,7 @@ static void menu_draw()
         ppb = frequency_get_ppb();
         LCD_Puts(1, 0, "PPB    ");
         LCD_Puts(0, 1, "        ");
-        sprintf(screen_buffer, "%ld.%02ld", ppb / 100, abs(ppb) % 100);
+        sprintf(screen_buffer, "%ld.%02d", ppb / 100, abs(ppb) % 100);
         LCD_Puts(0, 1, screen_buffer);
         break;
     case SCREEN_PWM:

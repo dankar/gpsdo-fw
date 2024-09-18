@@ -74,6 +74,8 @@ void Error_Handler(void);
 #define VCO_CONTROL_GPIO_Port GPIOA
 #define LCD_CONTRAST_Pin GPIO_PIN_10
 #define LCD_CONTRAST_GPIO_Port GPIOA
+#define LCD_RW_Pin GPIO_PIN_3
+#define LCD_RW_GPIO_Port GPIOB
 #define LCD_D4_Pin GPIO_PIN_4
 #define LCD_D4_GPIO_Port GPIOB
 #define LCD_D5_Pin GPIO_PIN_5

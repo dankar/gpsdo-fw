@@ -1,3 +1,6 @@
 [submodule "lib/eeprom"]
 	path = lib/eeprom
 	url = https://github.com/nimaltd/ee
+[submodule "lib/LCD"]
+	path = lib/LCD
+	url = https://github.com/nimaltd/LCD-Character/
