@@ -70,6 +70,8 @@ void gpsdo(void)
     HAL_TIM_Base_Start(&htim3);
     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
 
+    gps_start_it();
+
     while (1) {
         gps_read();
         menu_run();
