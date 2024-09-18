@@ -59,7 +59,9 @@ void gpsdo(void)
 
     LCD_CreateChar(1, lcd_backslash);
 
-    warmup();
+    gps_start_it();
+
+    //warmup();
 
     LCD_Clear();
 
@@ -69,7 +71,7 @@ void gpsdo(void)
     HAL_TIM_Base_Start(&htim3);
     HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
 
-    gps_start_it();
+    
 
     while (1) {
         gps_read();

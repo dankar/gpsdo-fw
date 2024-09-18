@@ -12,7 +12,7 @@
 #include "int.h"
 
 /// All times in ms
-#define DEBOUNCE_TIME        100
+#define DEBOUNCE_TIME        50
 #define SCREEN_REFRESH_TIME  500
 #define VCO_ADJUSTMENT_DELAY 3000
 

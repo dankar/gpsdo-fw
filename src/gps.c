@@ -1,11 +1,13 @@
 #include "gps.h"
+#include "LCD.h"
+#include "main.h"
+#include "stm32f1xx_hal_uart.h"
 #include "usart.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include "LCD.h"
 
 #define MAX_GPS_LINE 512
 
@@ -14,81 +16,94 @@ char   gps_time[9]  = { '\0' };
 char   num_sats     = 0;
 size_t gps_line_len = 0;
 
-#define FIFO_BUFFER_SIZE 128
+#define FIFO_BUFFER_SIZE 256
 
-typedef struct  {
+typedef struct {
     uint8_t buffer[FIFO_BUFFER_SIZE];
-    size_t read;
-    size_t write;
+    size_t  read;
+    size_t  write;
 } fifo_buffer_t;
 
-typedef enum {
-    FIFO_WRITE,
-    FIFO_READ
-} fifo_operation;
+typedef enum { FIFO_WRITE, FIFO_READ } fifo_operation;
 
-volatile fifo_buffer_t fifo_buffer_gps = { 0 };
-volatile fifo_buffer_t fifo_buffer_gps_ext = { 0 };
+volatile fifo_buffer_t fifo_buffer_gps  = { 0 };
+volatile fifo_buffer_t fifo_buffer_comm = { 0 };
 
-size_t fifo_next(volatile const fifo_buffer_t *fifo, fifo_operation op)
+size_t fifo_next(volatile const fifo_buffer_t* fifo, fifo_operation op)
 {
-    if(op == FIFO_WRITE)
-    {
+    if (op == FIFO_WRITE) {
         return (fifo->write + 1) % FIFO_BUFFER_SIZE;
-    }
-    else
-    {
+    } else {
         return (fifo->read + 1) % FIFO_BUFFER_SIZE;
     }
 }
-    
 
-bool fifo_write(volatile fifo_buffer_t *fifo, const uint8_t c)
+bool fifo_write(volatile fifo_buffer_t* fifo, const uint8_t c)
 {
     size_t next = fifo_next(fifo, FIFO_WRITE);
-    if(next == fifo->read)
-    {
+    if (next == fifo->read) {
         return false;
     }
     fifo->buffer[fifo->write] = c;
-    fifo->write = next;
+    fifo->write               = next;
     return true;
 }
 
-bool fifo_read(volatile fifo_buffer_t *fifo, uint8_t *c)
+bool fifo_read(volatile fifo_buffer_t* fifo, uint8_t* c)
 {
-    size_t next = fifo_next(fifo, FIFO_READ);
-    if(next == fifo->write)
-    {
+    if (fifo->read == fifo->write) {
         return false;
     }
-    *c = fifo->buffer[fifo->read];
-    fifo->read = next;
+    *c         = fifo->buffer[fifo->read];
+    fifo->read = fifo_next(fifo, FIFO_READ);
 
     return true;
 }
 
-volatile uint8_t it_buf;
+#define GPS_RX_BUFFER_SIZE  20
+#define COMM_RX_BUFFER_SIZE 1
 
+volatile uint8_t gps_it_buf[GPS_RX_BUFFER_SIZE];
+volatile uint8_t comm_it_buf[COMM_RX_BUFFER_SIZE];
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+static void gps_start_gps_rx()
 {
-    if(huart == &huart3)
-    {
-        fifo_write(&fifo_buffer_gps, it_buf);
-        HAL_UART_Receive_IT(&huart3, (uint8_t*)&it_buf, 1);
-    } else if(huart == &huart2) {
-        fifo_write(&fifo_buffer_gps_ext, it_buf);
-        HAL_UART_Receive_IT(&huart2, (uint8_t*)&it_buf, 1);
-    }   
+    if (HAL_UART_Receive_DMA(&huart3, (uint8_t*)gps_it_buf, GPS_RX_BUFFER_SIZE) != HAL_OK) {
+        Error_Handler();
+    }
+}
+static void gps_start_comm_rx()
+{
+    if (HAL_UART_Receive_DMA(&huart2, (uint8_t*)comm_it_buf, COMM_RX_BUFFER_SIZE) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+{
+    if (huart == &huart3) {
+        for (size_t i = 0; i < GPS_RX_BUFFER_SIZE; i++) {
+            if (!fifo_write(&fifo_buffer_gps, gps_it_buf[i])) {
+                Error_Handler();
+            }
+        }
+        gps_start_gps_rx();
+    } else if (huart == &huart2) {
+        for (size_t i = 0; i < COMM_RX_BUFFER_SIZE; i++) {
+            if (!fifo_write(&fifo_buffer_comm, comm_it_buf[i])) {
+                Error_Handler();
+            }
+        }
+        gps_start_comm_rx();
+    }
 }
 
 void gps_start_it()
 {
-    HAL_UART_Receive_IT(&huart2, (uint8_t*)&it_buf, 1);
-    HAL_UART_Receive_IT(&huart3, (uint8_t*)&it_buf, 1);
+    gps_start_gps_rx();
+    gps_start_comm_rx();
 }
-    
+
 // Maybe use X-CUBE-GNSS here?
 void gps_parse(char* line)
 {
@@ -117,28 +132,49 @@ void gps_parse(char* line)
     }
 }
 
+// Small risk of overrun here...
+#define SEND_BUFFER_SIZE 128
+uint8_t send_buf[SEND_BUFFER_SIZE];
+uint8_t gps_send_buf[SEND_BUFFER_SIZE];
+uint8_t comm_send_buf[SEND_BUFFER_SIZE];
+size_t  send_size;
+
 void gps_read()
 {
+    send_size = 0;
     uint8_t c;
     while (fifo_read(&fifo_buffer_gps, &c)) {
-        gps_line[gps_line_len] = c;
-
-        while(HAL_UART_Transmit_IT(&huart2, &c, 1) != HAL_OK);
-
-        if (gps_line[gps_line_len] == '\n') {
-            gps_line[++gps_line_len] = '\0';
+        gps_line[gps_line_len++] = c;
+        send_buf[send_size++]    = c;
+        if (c == '\n') {
+            gps_line[gps_line_len] = '\0';
             gps_parse(gps_line);
             gps_line_len = 0;
             continue;
         }
-        gps_line_len++;
         if (gps_line_len >= MAX_GPS_LINE) {
             gps_line_len = 0;
             return;
         }
     }
 
-    while(fifo_read(&fifo_buffer_gps_ext, &c)) {
-        while(HAL_UART_Transmit_IT(&huart3, &c, 1) != HAL_OK);
+    if (send_size) {
+        while (huart2.gState != HAL_UART_STATE_READY)
+            ;
+        memcpy(gps_send_buf, send_buf, SEND_BUFFER_SIZE);
+        HAL_UART_Transmit_IT(&huart2, gps_send_buf, send_size);
     }
+
+    send_size = 0;
+    while (fifo_read(&fifo_buffer_comm, &c)) {
+        send_buf[send_size++] = c;
+    }
+    
+    if (send_size) {
+        while (huart3.gState != HAL_UART_STATE_READY)
+            ;
+        memcpy(comm_send_buf, send_buf, SEND_BUFFER_SIZE);
+        HAL_UART_Transmit_IT(&huart3, comm_send_buf, send_size);
+    }
+    
 }
