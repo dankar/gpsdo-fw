@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "LCD.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,7 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+void gpsdo();
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +51,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void gpsdo(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -100,13 +100,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-      /*uint8_t buffer[512];
-    if(HAL_UART_Receive(&huart3, buffer, 1, 1000) == HAL_OK)
-    {
-      CDC_Transmit_FS(buffer, 1);
-    }*/
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
