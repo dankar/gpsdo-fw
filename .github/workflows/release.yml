@@ -38,3 +38,5 @@ jobs:
         files: |
           build/gpsdo.elf
           build/gpsdo.bin
+          LICENSE.md
+          README.md
