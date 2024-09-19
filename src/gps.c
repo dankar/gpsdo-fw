@@ -83,16 +83,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
     if (huart == &huart3) {
         for (size_t i = 0; i < GPS_RX_BUFFER_SIZE; i++) {
-            if (!fifo_write(&fifo_buffer_gps, gps_it_buf[i])) {
-                Error_Handler();
-            }
+            fifo_write(&fifo_buffer_gps, gps_it_buf[i]);
         }
         gps_start_gps_rx();
     } else if (huart == &huart2) {
         for (size_t i = 0; i < COMM_RX_BUFFER_SIZE; i++) {
-            if (!fifo_write(&fifo_buffer_comm, comm_it_buf[i])) {
-                Error_Handler();
-            }
+            fifo_write(&fifo_buffer_comm, comm_it_buf[i]);
         }
         gps_start_comm_rx();
     }
@@ -107,7 +103,7 @@ void gps_start_it()
 // Maybe use X-CUBE-GNSS here?
 void gps_parse(char* line)
 {
-    if (strstr(line, "$GNGGA") == line) {
+    if (strstr(line, "GGA") == line+3) {
         char* pch = strtok(line, ",");
 
         pch = strtok(NULL, ","); // Time
