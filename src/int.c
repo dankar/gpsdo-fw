@@ -16,7 +16,7 @@ volatile uint32_t device_uptime    = 0;
 volatile uint8_t  first            = 1;
 volatile uint32_t last_pps         = 0;
 
-const char spinner[]   = "|/-\1";
+const char spinner[]   = "\2\3\4";
 uint8_t    pps_spinner = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
@@ -25,6 +25,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
         timer_overflows++;
     } else if (htim == &htim2) {
         device_uptime++;
+        if(HAL_GetTick() - last_pps > 1500)
+        {
+            if(!menu_printing)
+            {
+                LCD_Puts(0,0,"\5");
+            }
+        }
     }
 }
 
@@ -73,10 +80,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
         }
 
         if (!menu_printing) {
-            menu_printing = 1;
             LCD_PutCustom(0, 0, spinner[pps_spinner]);
             pps_spinner   = (pps_spinner + 1) % strlen(spinner);
-            menu_printing = 0;
         }
     }
 }
