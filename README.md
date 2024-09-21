@@ -2,6 +2,8 @@
 
 This is an alternative firmware for the BH3SAP GPSDO sold on various platforms.
 
+![Image of the GPSDO running this firmware](https://github.com/dankar/gpsdo-fw/blob/main/doc/gpsdo.jpg?raw=true)
+
 ### Theory of operation
 
 Most of this is based on reverse engineering the circuit, and which pins certain things were connected to. The base of the device is a Bluepill board with a STM32F103C8T6 MCU. The oscillator is an Isotemp 143-141 OCXO which can be trimmed with a DC voltage. The output of the oscillator is buffered by a OPA692 and has an output resistor of 51 Ohms. The GPS differs between models, some have an ATGM336H and others a u-blox Neo-6M (perhaps not authentic). The 1PPS output from the GPS is not buffered, so it has very high output impedande.

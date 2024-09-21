@@ -75,9 +75,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim)
 
             previous_capture = capture;
             timer_overflows  = 0;
-            last_pps         = current_tick;
             first            = 0;
         }
+
+        last_pps         = current_tick;
 
         if (!menu_printing) {
             LCD_PutCustom(0, 0, spinner[pps_spinner]);
