@@ -1,4 +1,4 @@
-## Alternatve firmware for the BH3SAP GPSDO
+## Alternative firmware for the BH3SAP GPSDO
 
 This is an alternative firmware for the BH3SAP GPSDO sold on various platforms.
 
